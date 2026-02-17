@@ -1,16 +1,5 @@
-# React + Vite
+# Success / Failure Checklist
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Wanted to make something similar to the checklist feature in Apple's Notes app, but instead of only checking things off and sending them to the bottom, you can label them as either a success or failure while checking them off.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+<img width="567" height="521" alt="Screenshot 2026-02-17 at 12 28 15 AM" src="https://github.com/user-attachments/assets/f1fc27b5-b6ea-4c38-853f-8e114130e6cb" />
