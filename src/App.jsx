@@ -16,7 +16,7 @@ const STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f5f0e8; --paper: #faf7f2;
+    --bg: #f0f0f0; --paper: #faf7f2;
     --ink: #2a2118; --ink-light: #7a6e5f; --ink-faint: #c5bfb2;
     --success: #3a7d44; --success-oval: #4a9957;
     --failure: #b83232; --failure-oval: #c94040;
@@ -468,7 +468,7 @@ export default function App() {
                                 value={rawText}
                                 onChange={(e) => setRawText(e.target.value)}
                                 placeholder={
-                                    "Start typing, one item per line…\n\nFinished the design prototype\nMissed the 3pm deadline\nClosed the Henderson deal\nForgot to email the team"
+                                    "Start typing, one item per line…\n\nFinished the design prototype\nAttend the 3pm meeting\nGrocery shopping\nEmail the team"
                                 }
                                 rows={10}
                                 style={{
