@@ -287,6 +287,7 @@ export default function App() {
     const [phase, setPhase] = useState("editing");
     const [rawText, setRawText] = useState("");
     const [listTitle, setListTitle] = useState("Verdict List");
+    const [ratio, setRatio] = useState(null);
     const [nodes, setNodes] = useState([]);
     const editorRef = useRef(null);
     const textareaRefs = useRef({});
@@ -381,18 +382,15 @@ export default function App() {
         });
     }, []);
 
-    /* ── Classify (pure state update — snapshot happens in VerdictGroup) ── */
-
     const classify = useCallback((groupId, itemId, newState) => {
-        setNodes((prev) =>
-            prev.map((node) => {
+        setNodes((prev) => {
+            const next = prev.map((node) => {
                 if (node.kind !== "group" || node.id !== groupId) return node;
 
                 const items = node.items;
                 const item = items.find((i) => i.id === itemId);
                 if (!item) return node;
 
-                // Toggle off
                 if (item.state === newState) {
                     return {
                         ...node,
@@ -418,16 +416,24 @@ export default function App() {
                     reordered =
                         firstFailIdx === -1
                             ? [...rest, updated]
-                            : [
-                                ...rest.slice(0, firstFailIdx),
-                                updated,
-                                ...rest.slice(firstFailIdx),
-                            ];
+                            : [...rest.slice(0, firstFailIdx), updated, ...rest.slice(firstFailIdx)];
                 }
 
                 return { ...node, items: reordered };
-            })
-        );
+            });
+
+            const allItems = next.flatMap((n) => n.kind === "group" ? n.items : []);
+            const total = allItems.length;
+            const succeeded = allItems.filter((i) => i.state === "success").length;
+            const failed = allItems.filter((i) => i.state === "failure").length;
+            if (total > 0 && succeeded + failed === total) {
+                setRatio({ succeeded: Math.round((succeeded / total) * 100), failed: Math.round((failed / total) * 100) });
+            } else {
+                setRatio(null);
+            }
+
+            return next;
+        });
     }, []);
 
     /* ── Render ── */
@@ -453,6 +459,11 @@ export default function App() {
                             <IcoOval />
                             Make List
                         </button>
+                        {ratio && (
+                            <span style={{ fontSize: "0.8rem", color: "var(--ink-light)", fontFamily: "'Lora', serif", fontStyle: "italic" }}>
+                                Succeeded: {ratio.succeeded}%, Failed: {ratio.failed}%
+                            </span>
+                        )}
                     </div>
 
                     <div className="editor-body">
