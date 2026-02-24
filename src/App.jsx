@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useLayoutEffect } from "react";
+import { useState, useRef, useCallback, useLayoutEffect, useEffect } from "react";
 
 let _uid = 0;
 const uid = () => `u${++_uid}`;
@@ -292,7 +292,16 @@ export default function App() {
     const editorRef = useRef(null);
     const textareaRefs = useRef({});
 
-    /* ── Convert from initial textarea ── */
+    useEffect(() => {
+        const inProgress = phase === "doc" && ratio === null;
+        if (!inProgress) return;
+        const handler = (e) => {
+            e.preventDefault();
+            e.returnValue = "";
+        };
+        window.addEventListener("beforeunload", handler);
+        return () => window.removeEventListener("beforeunload", handler);
+    }, [phase, ratio]);
 
     const handleConvert = useCallback(() => {
         const ta = editorRef.current;
