@@ -130,8 +130,6 @@ const STYLES = `
   .legend span { display: flex; align-items: center; gap: 5px; }
 `;
 
-/* ─── Icons ───────────────────────────────────────────────────────────── */
-
 const IcoOval = () => (
     <svg
         width="16"
@@ -212,15 +210,6 @@ function Oval({ state, onLeft, onRight }) {
     );
 }
 
-/* ─── VerdictGroup with FLIP animations ──────────────────────────────── */
-/*
-  FLIP = First, Last, Invert, Play
-  1. Before state update: snapshot each item's top position (First)
-  2. After React re-renders: read new positions (Last)
-  3. Invert: translateY each element from (First - Last) → 0
-  4. Play: Web Animations API does the tweening
-*/
-
 function VerdictGroup({ node, onClassify }) {
     const itemRefs = useRef({}); // itemId → DOM row element
     const snapRef = useRef(null); // snapshot taken synchronously before state update
@@ -297,6 +286,7 @@ function VerdictGroup({ node, onClassify }) {
 export default function App() {
     const [phase, setPhase] = useState("editing");
     const [rawText, setRawText] = useState("");
+    const [listTitle, setListTitle] = useState("Verdict List");
     const [nodes, setNodes] = useState([]);
     const editorRef = useRef(null);
     const textareaRefs = useRef({});
@@ -337,6 +327,10 @@ export default function App() {
 
         setNodes(newNodes);
         setPhase("doc");
+
+        const firstLine = full.split("\n").find(l => l.trim()) || "Verdict List";
+        document.title = firstLine;
+        setListTitle(firstLine);
     }, []);
 
     /* ── Convert from a text node in doc phase ── */
@@ -443,7 +437,7 @@ export default function App() {
             <style>{STYLES}</style>
             <div className="app">
                 <div className="header">
-                    <h1>Verdict List</h1>
+                    <h1>{listTitle}</h1>
                     <p>
                         Type your items, select a block of texts, then hit "Make List" to
                         start
