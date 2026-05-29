@@ -1,6 +1,5 @@
 {
     "name": "Verdict Checklist",
-    "version": "1.0.1",
     "short_name": "Verdict",
     "description": "Checklist with success/failure labels",
     "start_url": "/",
