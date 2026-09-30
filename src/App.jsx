@@ -521,12 +521,6 @@ export default function App() {
 
                 <div className="editor-card">
                     <div className="toolbar">
-                        {phase === "editing" && (
-                            <>
-                                <button className="toolbar-btn" onClick={() => fileInputRef.current?.click()} type="button">Load</button>
-                                <input ref={fileInputRef} type="file" accept=".json,application/json" onChange={loadList} style={{ display: "none" }} />
-                            </>
-                        )}
                         <button
                             className="toolbar-btn"
                             onClick={phase === "editing" ? handleConvert : handleConvertDoc}
@@ -534,6 +528,12 @@ export default function App() {
                             <IcoOval />
                             Make List
                         </button>
+                        {phase === "editing" && (
+                            <>
+                                <button className="toolbar-btn" onClick={() => fileInputRef.current?.click()} type="button">Load</button>
+                                <input ref={fileInputRef} type="file" accept=".json,application/json" onChange={loadList} style={{ display: "none" }} />
+                            </>
+                        )}
                         {phase === "doc" && ratio === null && (
                             <button className="toolbar-btn" onClick={saveList} type="button">Save</button>
                         )}
