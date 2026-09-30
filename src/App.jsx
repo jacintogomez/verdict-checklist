@@ -9,6 +9,24 @@ const makeGroupNode = (lines = []) => ({
     items: lines.map((text) => ({ id: uid(), text, state: "neutral" })),
 });
 
+const isSaveFile = (value) => {
+    if (!value || value.version !== 1 || value.phase !== "doc" || typeof value.title !== "string" || !Array.isArray(value.nodes)) return false;
+    return value.nodes.every((node) => {
+        if (node?.kind === "text") return typeof node.text === "string";
+        if (node?.kind !== "group" || !Array.isArray(node.items)) return false;
+        return node.items.every((item) => typeof item?.text === "string" && ["neutral", "success", "failure"].includes(item.state));
+    });
+};
+
+const getCompletion = (nodes) => {
+    const items = nodes.flatMap((node) => node.kind === "group" ? node.items : []);
+    const succeeded = items.filter((item) => item.state === "success").length;
+    const failed = items.filter((item) => item.state === "failure").length;
+    return items.length > 0 && succeeded + failed === items.length
+        ? { succeeded: Math.round((succeeded / items.length) * 100), failed: Math.round((failed / items.length) * 100) }
+        : null;
+};
+
 /* ─── Styles ──────────────────────────────────────────────────────────── */
 
 const STYLES = `
@@ -291,6 +309,7 @@ export default function App() {
     const [nodes, setNodes] = useState([]);
     const editorRef = useRef(null);
     const textareaRefs = useRef({});
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         const inProgress = phase === "doc" && ratio === null;
@@ -341,6 +360,47 @@ export default function App() {
         const firstLine = full.split("\n").find(l => l.trim()) || "Verdict List";
         document.title = firstLine;
         setListTitle(firstLine);
+    }, []);
+
+    const saveList = useCallback(() => {
+        const save = {
+            version: 1,
+            phase: "doc",
+            title: listTitle,
+            nodes: nodes.map((node) => node.kind === "group"
+                ? { kind: "group", items: node.items.map(({ text, state }) => ({ text, state })) }
+                : { kind: "text", text: node.text }),
+        };
+        const blob = new Blob([JSON.stringify(save, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${(listTitle || "verdict-list").trim().replace(/[^a-z0-9-_]+/gi, "-").replace(/^-|-$/g, "") || "verdict-list"}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    }, [listTitle, nodes]);
+
+    const loadList = useCallback(async (event) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (!file) return;
+        try {
+            const parsed = JSON.parse(await file.text());
+            if (!isSaveFile(parsed)) throw new Error("This file is not a valid Verdict List save.");
+            const restored = parsed.nodes.map((node) => node.kind === "group"
+                ? { kind: "group", id: uid(), items: node.items.map((item) => ({ id: uid(), text: item.text, state: item.state })) }
+                : { kind: "text", id: uid(), text: node.text });
+            setNodes(restored);
+            setRawText("");
+            setListTitle(parsed.title);
+            document.title = parsed.title;
+            setRatio(getCompletion(restored));
+            setPhase("doc");
+        } catch (error) {
+            window.alert(error instanceof SyntaxError ? "Could not read this file as JSON." : error.message || "Could not load this save file.");
+        }
     }, []);
 
     /* ── Convert from a text node in doc phase ── */
@@ -468,6 +528,15 @@ export default function App() {
                             <IcoOval />
                             Make List
                         </button>
+                        {phase === "editing" && (
+                            <>
+                                <button className="toolbar-btn" onClick={() => fileInputRef.current?.click()} type="button">Load</button>
+                                <input ref={fileInputRef} type="file" accept=".json,application/json" onChange={loadList} style={{ display: "none" }} />
+                            </>
+                        )}
+                        {phase === "doc" && ratio === null && (
+                            <button className="toolbar-btn" onClick={saveList} type="button">Save</button>
+                        )}
                         {ratio && (
                             <span style={{ fontSize: "0.8rem", color: "var(--ink-light)", fontFamily: "'Lora', serif", fontStyle: "italic" }}>
                                 Succeeded: {ratio.succeeded}%, Failed: {ratio.failed}%
